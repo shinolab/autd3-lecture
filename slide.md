@@ -87,7 +87,7 @@ style: |
 
 鈴木 颯
 東京大学 篠田・牧野研究室 特任助教
-2025/xx/xx
+2025/04/30
 
 ---
 
@@ -108,7 +108,7 @@ style: |
 - AUTD3: Airborne Ultrasound Tactile Display ver. 3
 - 超音波の振幅/位相を制御することで, 空間に様々な音場を生成
 - 音響放射圧を利用して, 人体の表面を非接触で押すことが主な目的
-- AUTD3は複数のデバイスを連結して一つの大きなPhased arrayを構成することが可能
+- AUTD3は複数デバイスを連結して一つの大きなPhased arrayを構成することが可能
 - Tactile以外の用途で使う時は, Airborne Ultrasound Phased Arrayとも呼んでる
   - ただし, デバイス名はあくまでもAUTD3
 
@@ -123,7 +123,7 @@ style: |
 <div>
 
 - フェーズドアレイとは？
-  - 位相を個別に制御できる振動子を配列したもの
+  - 位相を個別に制御できる振動子の配列
   - 典型的には格子状に配列
 
 - 位相 ($\sim$音の出るタイミング) を制御し, 音の干渉を利用して音場を生成
@@ -153,13 +153,15 @@ style: |
 <div>
 
 - AUTD3デバイスは以下の3つから構成される
-  - CPUボード: 主に通信を担当
+  - CPUボード$^1$: 主に通信を担当
   - FPGA: 主に駆動信号生成を担当
   - 振動子アレイ
 
 </div>
 
 </div>
+
+>>> 1: AP-RZT-0A, Alpha Project Co.,Ltd. 要はマイコンボード
 
 ---
 
@@ -302,7 +304,7 @@ style: |
 
 <div>
 
-- 強度, 位相データの急峻な変化を抑えるモジュール
+- 強度, 位相の急峻な変化を抑えるモジュール
   - これによって, 可聴音ノイズを抑制する$^1$
 
 >>> 1: Suzuki, Shun, et al. “Reducing amplitude fluctuation by gradual phase shift in midair ultrasound haptics.” IEEE transactions on haptics 13.1 (2020): 87-93.
@@ -323,7 +325,7 @@ style: |
 
 - 左の図は, 周期$T=12$の場合, $t=t_s$で位相$P$が$2$から$6$に変化した場合
 
-- 基本的には, 単純移動平均フィルタと同じ動作
+- 基本的に単純移動平均フィルタと同じ
   - ただし, **位相の周期性を考慮する**
   - また, 途中で目標値が動的に変わる場合も異なる挙動になる
 
@@ -448,7 +450,7 @@ style: |
 
 - このモードは柔軟だがメモリの使用量が大きい
   - メモリサイズ: $524288\,\mathrm{byte}$, 1Gainあたり強度位相に$2\,\mathrm{byte}\times 249$ → 最大で$\frac{524288}{2\times 249}=1052$個のGainを格納できる
-  - 実際には切りよく1024個 ($k=1,2,...,1023$)
+  - 実際には切りよく1024個 ($k=0,1,...,1023$)
 
 </div>
 
@@ -471,7 +473,7 @@ style: |
 
 - このモードは焦点しか出せないがメモリの使用量が少ない
   - メモリサイズ: $524288\,\mathrm{byte}$, 1焦点あたりに$18\times 3 + 8\,\mathrm{bit}$ → 最大で$\frac{524288\times 8}{18 \times 3 +8}=76260$個の焦点を格納できる
-  - 実際には切りよく65536個 ($k=1,2,...,65535$)
+  - 実際には切りよく65536個 ($k=0,1,...,65535$)
 
 </div>
 
@@ -527,13 +529,15 @@ style: |
 - AUTD3は通信プロトコルにEtherCATを採用
 - EtherCAT: Beckhoff社が開発したフィールドバスシステム
   - Ethernet上に構築
-  - リアルタイム
+  - リアルタイム$^1$
   - 分散同期クロック (DC: Distributed Clock) を提供
     - 精度はsub-μsオーダー
 
 </div>
 
 </div>
+
+>>> 1: リアルタイム: 所定の時間内に処理が完了すること
 
 ---
 
@@ -554,7 +558,7 @@ style: |
   - $t^1_r + t_\text{offset} = t^2_s + t_\text{delay}$
 
 - これから$t^1$と$t^2$のクロックずれ $t_\text{offset}$ を求める
-  - これを以て各デバイスのクロックずれを補正する$^2$
+  - これを以て各slaveのクロックずれを補正$^2$
 
 >>> 1: 通信ディレイ$t_\text{delay}$は送受信で同じと仮定
 >>> 2: 実際には他にも色々やってる
@@ -576,10 +580,9 @@ style: |
 - リング状になってる通信路上を固定長のフレームを常にぶん回すことで通信する
   - 各slaveはそのフレームをon-the-flyで処理
   - この処理のため特殊なESC (EtherCAT Slave Controller) が必要
-- これによって, レイテンシを最小にしつつリアルタイム$^1$通信を実現
+- これによって, レイテンシを最小にしつつリアルタイム通信を実現
 - EtherCAT masterは, 一定の間隔でフレームを送信することが求められる
 
->>> 1: リアルタイム: 所定の時間内に処理が完了すること
 
 </div>
 
@@ -617,11 +620,11 @@ style: |
 
 <div>
 
-- 基本的に, CPUボードからアクセスできるEtherCATのDCシステム時刻をFPGA側にコピーしている$^1$
-  - EtherCATのDCシステム時刻の単位は$1\,\mathrm{ns}$, FPGA内部では$\frac{1}{20.48\,\mathrm{MHz}}$単位に変換$^2$
+- 基本的に, CPUボード上のEtherCATのDCシステム時刻をFPGA側にコピーしている$^1$
+  - EtherCATのシステム時刻の単位は$1\,\mathrm{ns}$, FPGA内部では$\frac{1}{20.48\,\mathrm{MHz}}$単位に変換$^2$
 
 - PWM信号の生成や, STM/Modulationのサンプリングはこのシステム時刻を利用する
-  - EtherCATのDCシステム時刻が同期しているので, これらも自動的に同期する
+  - EtherCATのシステム時刻が同期しているので, これらも自動的に同期する
 
 >>> 1: 実際にはもっと色々やってるけど割愛. [AUTD3のドキュメント](https://shinolab.github.io/autd3-doc/jp/Developer_Manual/fpga/sync.html)を参照.
 >>> 2: $20.48\,\mathrm{MHz} = 512\times 40\,\mathrm{kHz}$
@@ -796,3 +799,241 @@ Segment 0からSegment 1への遷移
 ---
 
 ## autd3ライブラリの主要コンポーネント
+
+<div class="flex ss">
+
+![width:540](software-arch.svg)
+
+<div>
+
+- `Controller`: 制御の中心
+  - `Geometry`: `Device`のコンテナ
+  - `Device`: `Transducer`のコンテナ
+  - `Transducer`: 振動子に対応
+  - `Link`: AUTD3デバイスとの通信を担当
+- `Gain`: 位相/振幅情報 (の素) を格納
+- `GainSTM`/`FociSTM`: STM制御
+- `Modulation`: AM変調制御
+- `Silencer`: Silencer制御
+
+</div>
+
+</div>
+
+---
+
+## `Controller`
+
+<div class="topic">autd3ライブラリの主要コンポーネント</div>
+
+- 基本的にデバイスの制御はこのクラスを通して行う
+  - EtherCATの仕様上, 1フレームで送れる情報は固定長なので, 大きなデータを細かく分ける送信制御とか
+- `Controller`から`Geometry`に直接アクセスできる
+  - `Geometry`は`Device`のコンテナであり, 現実空間でデバイスがどう置かれているかを管理 
+- `Gain`の位相計算とかも実際は`Controller`内部で行ってる
+  - 例えば焦点だと, 振動子の位置情報が必要なので
+
+---
+
+## `Link`
+
+<div class="topic">autd3ライブラリの主要コンポーネント</div>
+
+デバイスとの通信を担当
+
+- `TwinCAT`: TwinCAT3に通信処理をディスパッチ
+- `SOEM`: SOEMを利用して通信
+- `Simulator`: シミュレータ
+
+---
+
+## `TwinCAT`
+
+<style scoped>
+.center {
+  text-align: center;
+}
+</style>
+
+<div class="topic">autd3ライブラリの主要コンポーネント: Link</div>
+
+<div class="center">
+
+![height:80](software-twincat.svg)
+
+</div>
+
+- `TwinCAT` Linkでは実際のEtherCAT通信処理はTwinCAT 3が行う
+  - 別途TwinCAT 3を走らせておく必要あり
+
+- `TwinCAT` LinkとTwinCAT 3との間の通信は**EtherCATではない**
+  - LAN経由とかでもいい
+    - `TwinCAT`はローカルのTwinCAT 3を利用
+    - `RemoteTwinCAT`はLAN上の別PCのTwinCAT 3を利用
+
+>>> ADS: Automation Device Specification. Beckhoffの通信プロトコル.
+
+---
+
+## `SOEM`
+
+<style scoped>
+.center {
+  text-align: center;
+}
+</style>
+
+<div class="topic">autd3ライブラリの主要コンポーネント: Link</div>
+
+<div class="center">
+
+![height:160](software-soem.svg)
+
+</div>
+
+- `SOEM` LinkはSOEMを内包
+
+- `TwinCAT` Linkみたいに別PCで走らせる用の`RemoteSOEM` Linkもある
+ 
+>>> gRPC: Google Remote Procedure Call. RPCの一種.
+
+---
+
+## `Simualtor`
+
+<style scoped>
+.center {
+  text-align: center;
+}
+</style>
+
+<div class="topic">autd3ライブラリの主要コンポーネント: Link</div>
+
+<div class="center">
+
+![height:80](software-simulator.svg)
+
+</div>
+
+- `Simulator` LinkはAUTD3 Simulatorと通信するためのLink
+  - AUTD3 Simulatorを走らせておく必要あり
+
+- AUTD3 SimulatorはLAN上の別PCで走らせても良い
+
+---
+
+## `Gain`
+
+<div class="topic">autd3ライブラリの主要コンポーネント</div>
+
+各振動子に与える位相/振幅を計算する情報を格納
+
+<div class="flex ss">
+
+- `Focus`: 単焦点
+- `Bessel`: ベッセルビーム
+- `Plane`: 平面波
+
+<div>
+
+- `autd3-gain-holo`: 多焦点
+  - `Naive`: 単焦点解の重ね合わせ
+  - `GS`: Gerchberg-Saxton法
+  - `GSPAT`: Gerchberg-Saxton for Phased Array of Transducers
+  - `LM`: Levenberg-Marquardt法
+  - `Greedy`: 貪欲法
+
+</div>
+
+</div>
+
+---
+
+## `GainSTM`/`FociSTM`
+
+<div class="topic">autd3ライブラリの主要コンポーネント</div>
+
+- `GainSTM`: GainをSTM制御するための情報を格納
+  - `Gain`の配列とサンプリング分周比とか
+- `FociSTM`: 焦点をSTM制御するための情報を格納
+  - 焦点の配列とサンプリング分周比
+
+- なお, 実際にはファームウェア的には`Gain`は周期1の`GainSTM`と等価
+
+---
+
+## `Modulation`
+
+<div class="topic">autd3ライブラリの主要コンポーネント</div>
+
+AM変調用のデータ列を計算する情報を格納
+
+<div class="flex ss">
+
+- `Static`: 変調なし
+- `Sine`: 正弦波
+- `Square`: 矩形波
+
+<div>
+
+- `autd3-modulation-audio-file`: 音声ファイルからの変調
+  - `Wav`: WAVファイル
+  - `Csv`: CSVファイル
+
+</div>
+
+</div>
+
+---
+
+## `Silencer`
+
+<div class="topic">autd3ライブラリの主要コンポーネント</div>
+
+<div class="flex sa">
+
+![width:600](silencer_delta.svg)
+
+<div>
+
+- 2種類のモードがある
+  - `FixedUpdateRate`: 位相/強度に対してそれぞれ$\Delta$を指定
+  - `FixedCompletionTime`: 位相/強度に対してそれぞれ$\Delta T$を指定
+    - `strict_mode`: `true`の場合, 以下の条件を満たさない場合エラーを返す
+        - 変調のサンプリング周期 $\ge \Delta T$
+        - STMのサンプリング周期 $\ge \Delta T$
+
+</div>
+
+---
+
+## autd3ソフトウェアライブラリまとめ
+
+<div class="flex ss">
+
+![width:800](software-arch.svg)
+
+<div>
+
+1. 現実におけるAUTD3デバイスの位置とデバイスと通信するためのLinkを指定して`Controller`を作成
+1. `Gain`, `GainSTM`, `FociSTM`, `Modulation`, `Silencer`などなどを`Controller`経由で送信
+
+- 他にも色々あるので, [ドキュメント](https://shinolab.github.io/autd3-doc/jp/)を参照
+
+</div>
+
+</div>
+
+---
+
+## おわりに
+
+質問, バグ報告, 追加機能要望等はGitHubのissueでから遠慮なくどうぞ
+- バグったときに「バグりました」だけではどうしようもないので, 次の情報があると助かります
+  1. 環境 (OSとか使ってるコンパイラのバージョンとか)
+  1. 何が起こってるのか (期待している結果と実際の結果の差)
+  1. エラーメッセージ (あれば)
+  1. エラーを治すために何を試したか (全く何も試してないでも良い, これの意義は二度手間をなくすこと)
+  1. 問題のコード
+    - バグを再現する最小限のコードだとなお良い
+    - たまに画像で送ってくる人いるんですけど, 文字列として送ってください
