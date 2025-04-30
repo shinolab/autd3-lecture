@@ -1,0 +1,29 @@
+name: build
+
+on:
+  push:
+    branches: [ "main" ]
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: KoharaKazuya/marp-cli-action@v4
+      - run: |
+          mkdir dist
+          marp slide.md --html --output dist/index.html
+          cp *.svg dist/
+          cp *.jpg dist/
+          cp *.gif dist/
+          cp *.js dist/
+      - uses: actions/configure-pages@v2
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: dist
+          force_orphan: true
