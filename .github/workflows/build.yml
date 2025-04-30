@@ -13,7 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: KoharaKazuya/marp-cli-action@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+      - run: npm install -g @marp-team/marp-cli 
       - run: |
           mkdir dist
           marp slide.md --html --output dist/index.html
