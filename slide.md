@@ -696,10 +696,165 @@ style: |
 
 <div class="topic">補足①: STM/Modulationのメモリセグメントについて</div>
 
+<style scoped>
+.container-body {
+    width: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.container {
+    display: flex;
+    gap: 40px;
+}
+
+.segment-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.address-row {
+    display: flex;
+    justify-content: center;
+    padding: 0; 
+    margin: 0;
+}
+
+.address-box {
+    width: 80px;
+    height: 40px;
+    border: 1px solid #000000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.0em;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, font-weight 0.2s ease-in-out;
+    font-weight: normal;
+    padding: 0; 
+    margin: 0;
+}
+
+.address-box.header {
+    font-weight: bold;
+    border: 1px solid #000000;
+    color: #000000;
+}
+
+.address-box.active-segment-highlight {
+    background-color: #ff0000;
+    color: white;
+    font-weight: bold;
+}
+
+.address-box.inactive-segment-highlight {
+    background-color: #ffcccc;
+    color: #555;
+    font-weight: normal;
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 0px;
+    border-radius: 5px;
+}
+
+.info p {
+    margin: 2px 0;
+    font-size: 1em;
+}
+
+.info span {
+    font-weight: bold;
+}
+
+.options label {
+    cursor: pointer;
+    margin-left: 5px;
+    font-size: 1em;
+}
+
+.options input[type="checkbox"] {
+    cursor: pointer;
+    transform: scale(1.2);
+}
+
+button {
+    padding: 5px 10px;
+    font-size: 0.8em;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+</style>
 
 <div class="flex ss">
 
-![width:600](sync_idx.gif)
+<div class="container-body">
+<div class="container">
+    <div class="segment-container">
+        <p>Segment 0</p>
+        <div class="segment" id="segment1">
+            <div class="address-row">
+                <div class="address-box header">Addr</div>
+            </div>
+            <div class="address-row">
+                <div class="address-box active-segment-highlight" data-segment="1" data-addr="0">0</div>
+            </div>
+            <div class="address-row">
+                <div class="address-box" data-segment="1" data-addr="1">1</div>
+            </div>
+            <div class="address-row">
+                <div class="address-box" data-segment="1" data-addr="2">2</div>
+            </div>
+            <div class="address-row">
+                <div class="address-box" data-segment="1" data-addr="3">3</div>
+            </div>
+        </div>
+    </div>
+    <div class="segment-container">
+        <p>Segment 1</p>
+        <div class="segment" id="segment2">
+            <div class="address-row">
+                <div class="address-box header">Addr</div>
+            </div>
+            <div class="address-row">
+                <div class="address-box inactive-segment-highlight" data-segment="2" data-addr="0">0</div>
+            </div>
+            <div class="address-row">
+                <div class="address-box" data-segment="2" data-addr="1">1</div>
+            </div>
+            <div class="address-row">
+                <div class="address-box" data-segment="2" data-addr="2">2</div>
+            </div>
+            <div class="address-row">
+                <div class="address-box" data-segment="2" data-addr="3">3</div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="controls">
+    <div class="info">
+        <p>Time: <span id="timeStepDisplay">0</span></p>
+    </div>
+    <div class="options">
+        <input type="checkbox" id="transitionCheckbox">
+        <label for="transitionCheckbox">遷移</label>
+    </div>
+</div>
+<button id="stepButton">ステップ実行</button>
+</div>
 
 <div>
 
@@ -709,8 +864,9 @@ style: |
 
 </div>
 
-
 </div>
+
+<script type="module" src="./segment.js"></script>
 
 Segment 0からSegment 1への遷移
 
