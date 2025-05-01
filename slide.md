@@ -81,6 +81,9 @@ style: |
   .fw div{
     flex: var(--fw);
   }
+  .center {
+    text-align: center;
+  }
 ---
 
 # AUTD3 講習会
@@ -148,7 +151,7 @@ style: |
 
 <div class="flex ss">
 
-![height:500](autd3-arch.svg)
+<object type="image/svg+xml" data="autd3-arch.svg" height="450"></object>
 
 <div>
 
@@ -173,7 +176,11 @@ style: |
  
 ## AUTD3のアーキテクチャ in FPGA
 
-![width:1920](sig-gen.svg)
+<div class="center">
+
+<object type="image/svg+xml" data="sig-gen.svg" width="1100"></object>
+
+</div>
 
 ---
 
@@ -183,7 +190,7 @@ style: |
 
 <div class="flex sa">
 
-![width:400](sig-gen-pwm.svg)
+<object type="image/svg+xml" data="sig-gen-pwm.svg" width="400"></object>
 
 <div>
 
@@ -201,7 +208,7 @@ style: |
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #FFFFFF;
+  background-color: #fafafa;
 }
 .controls {
   font-size: 0.6em;
@@ -274,13 +281,13 @@ style: |
 
 <div class="flex sa">
 
-![width:400](sig-gen-pwe.svg)
+<object type="image/svg+xml" data="sig-gen-pwe.svg" width="320"></object>
 
 <div>
 
 - 入力: 強度データ (8bit), 出力: パルス幅 (9bit)
   - パルス幅と出力振幅の非線形性の補正
-  - 8bitデータ $([0,255])$を9bitデータ $([0,256])$に変換
+  - 8bitデータ $([0,255])$を9bitデータ $([0,256])$に
 
 - PWMにおける非線形性$^1$: $A \propto \sin\left(\pi\frac{D}{512}\right)$
   - $A$: 出力振幅, $D$: パルス幅
@@ -300,7 +307,7 @@ style: |
 
 <div class="flex sa">
 
-![width:400](sig-gen-silencer.svg)
+<object type="image/svg+xml" data="sig-gen-silencer.svg" width="400"></object>
 
 <div>
 
@@ -319,7 +326,7 @@ style: |
 
 <div class="flex sa">
 
-![width:800](silencer_normal.svg)
+<object type="image/svg+xml" data="silencer_normal.svg" width="400"></object>
 
 <div>
 
@@ -339,7 +346,7 @@ style: |
 
 <div class="flex sa">
 
-![width:800](silencer_wrap.svg)
+<object type="image/svg+xml" data="silencer_wrap.svg" width="400"></object>
 
 <div>
 
@@ -356,7 +363,7 @@ style: |
 
 <div class="flex sa">
 
-![width:800](silencer_dynamic.svg)
+<object type="image/svg+xml" data="silencer_dynamic.svg" width="400"></object>
 
 <div>
 
@@ -374,7 +381,7 @@ style: |
 
 <div class="flex sa">
 
-![width:600](silencer_delta.svg)
+<object type="image/svg+xml" data="silencer_delta.svg" width="360"></object>
 
 <div>
 
@@ -382,7 +389,7 @@ style: |
   - Fixed Update Rateモード: $\Delta$が全振動子で固定
   - Fixed Completion Stepsモード: $\Delta T$が全振動子で固定
 
-- $\Delta$が小さい, あるいは, $\Delta T$が大きいほど騒音は抑制される
+- $\Delta$が小さい, あるいは, $\Delta T$が大きいほど騒音は抑制
   - 更新ステップは$25\,\mathrm{\micro s}$で固定
 
 - Silencer内部では, より細かい制御を可能にするため, 強度$E$, 位相$P$を256倍している
@@ -397,7 +404,7 @@ style: |
 
 <div class="flex sa">
 
-![width:400](sig-gen-modulation.svg)
+<object type="image/svg+xml" data="sig-gen-modulation.svg" width="320"></object>
 
 <div>
 
@@ -406,7 +413,7 @@ style: |
   - これにより, Amplitude Modulationを実現する
 
 - 変調データは最大長65536のメモリに書き込まれたデータが順次サンプルされる
-  - データは$\frac{40\,\mathrm{kHz}}{d_\textrm{m}}$の周波数でサンプルされる (=この周波数で読み出しアドレスがインクリメントされる)
+  - データは$\frac{40\,\mathrm{kHz}}{d_\textrm{m}}$の周波数でサンプルされる (=この周波数で読み出しアドレスがインクリメント)
 
 </div>
 
@@ -418,7 +425,7 @@ style: |
 
 <div class="flex sa">
 
-![width:400](sig-gen-stm.svg)
+<object type="image/svg+xml" data="sig-gen-stm.svg" width="260"></object>
 
 <div>
 
@@ -441,7 +448,7 @@ style: |
 
 <div class="flex sa">
 
-![height:600](stm-gain.svg)
+<object type="image/svg+xml" data="stm-foci.svg" width="200"></object>
 
 <div>
 
@@ -462,14 +469,13 @@ style: |
 
 <div class="flex sa">
 
-![height:600](stm-foci.svg)
+<object type="image/svg+xml" data="stm-foci.svg" width="200"></object>
 
 <div>
 
 - $F_x[k],F_y[k],F_z[k]$: $k$番目の焦点の座標データ
   - 具体的には, それぞれ18bitの符号あり固定小数点数 (単位$0.025\,\mathrm{mm}$)
-- $E[k]$: $k$番目の焦点の強度データ
-  - つまり, 全振動子で共通
+- $E[k]$: $k$番目の焦点の強度データ (全振動子で共通)
 
 - このモードは焦点しか出せないがメモリの使用量が少ない
   - メモリサイズ: $524288\,\mathrm{byte}$, 1焦点あたりに$18\times 3 + 8\,\mathrm{bit}$ → 最大で$\frac{524288\times 8}{18 \times 3 +8}=76260$個の焦点を格納できる
@@ -481,7 +487,7 @@ style: |
  
 ## AUTD3の動作モデルまとめ
 
-![width:1920](sig-gen.svg)
+<object type="image/svg+xml" data="sig-gen.svg" width="1100"></object>
 
 ---
 
@@ -491,8 +497,8 @@ style: |
 
 <div style="--fw: 1;">
 
-![width:300](silencer_dynamic.svg)
-![width:300](silencer_delta.svg)
+<object type="image/svg+xml" data="silencer_dynamic.svg" width="300"></object>
+<object type="image/svg+xml" data="silencer_delta.svg" width="300"></object>
 
 </div>
 
@@ -522,7 +528,7 @@ style: |
 
 <div class="flex ss">
 
-![height:500](autd3-arch-ethercat.svg)
+<object type="image/svg+xml" data="autd3-arch-ethercat.svg" width="400"></object>
 
 <div>
 
@@ -545,7 +551,7 @@ style: |
 
 <div class="flex ss">
 
-![width:500](ethercat-dc.svg)
+<object type="image/svg+xml" data="ethercat-dc.svg" width="360"></object>
 
 <div>
 
@@ -573,7 +579,7 @@ style: |
 
 <div class="flex ss">
 
-![height:500](autd3-arch-ethercat.svg)
+<object type="image/svg+xml" data="autd3-arch-ethercat.svg" width="400"></object>
 
 <div>
 
@@ -616,7 +622,7 @@ style: |
 
 <div class="flex ss">
 
-![width:800](autd3-arch-cpu-fpga.svg)
+<object type="image/svg+xml" data="autd3-arch-cpu-fpga.svg" width="400"></object>
 
 <div>
 
@@ -658,7 +664,7 @@ style: |
 
 <div class="flex ss">
 
-![width:600](autd3-arch-summary.svg)
+<object type="image/svg+xml" data="autd3-arch-summary.svg" width="400"></object>
 
 <div>
 
@@ -792,7 +798,11 @@ Segment 0からSegment 1への遷移
 
 ## autd3ソフトウェアライブラリの依存関係
 
-![width:860](software.svg)
+<div class="center">
+
+<object type="image/svg+xml" data="software.svg" height="450"></object>
+
+</div>
 
 >>> autd3-link-soem, 及び, そのラッパーを分けているのは, SOEMがGPLライセンスなので (例外付きなので大丈夫だとは思うが念の為)
 
@@ -802,7 +812,7 @@ Segment 0からSegment 1への遷移
 
 <div class="flex ss">
 
-![width:540](software-arch.svg)
+<object type="image/svg+xml" data="software-arch.svg" width="460"></object>
 
 <div>
 
@@ -841,7 +851,7 @@ Segment 0からSegment 1への遷移
 
 デバイスとの通信を担当
 
-- `TwinCAT`: TwinCAT3に通信処理をディスパッチ
+- `TwinCAT`: TwinCAT3に通信処理を委託
 - `SOEM`: SOEMを利用して通信
 - `Simulator`: シミュレータ
 
@@ -849,17 +859,11 @@ Segment 0からSegment 1への遷移
 
 ## `TwinCAT`
 
-<style scoped>
-.center {
-  text-align: center;
-}
-</style>
-
 <div class="topic">autd3ライブラリの主要コンポーネント: Link</div>
 
 <div class="center">
 
-![height:80](software-twincat.svg)
+<object type="image/svg+xml" data="software-twincat.svg" height="80"></object>
 
 </div>
 
@@ -877,17 +881,11 @@ Segment 0からSegment 1への遷移
 
 ## `SOEM`
 
-<style scoped>
-.center {
-  text-align: center;
-}
-</style>
-
 <div class="topic">autd3ライブラリの主要コンポーネント: Link</div>
 
 <div class="center">
 
-![height:160](software-soem.svg)
+<object type="image/svg+xml" data="software-soem.svg" height="160"></object>
 
 </div>
 
@@ -901,17 +899,11 @@ Segment 0からSegment 1への遷移
 
 ## `Simualtor`
 
-<style scoped>
-.center {
-  text-align: center;
-}
-</style>
-
 <div class="topic">autd3ライブラリの主要コンポーネント: Link</div>
 
 <div class="center">
 
-![height:80](software-simulator.svg)
+<object type="image/svg+xml" data="software-simulator.svg" height="80"></object>
 
 </div>
 
@@ -992,7 +984,7 @@ AM変調用のデータ列を計算する情報を格納
 
 <div class="flex sa">
 
-![width:600](silencer_delta.svg)
+<object type="image/svg+xml" data="silencer_delta.svg" width="360"></object>
 
 <div>
 

@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+plt.rcParams["svg.fonttype"] = "none"
+
 
 def plot_silencer_normal():
     ts_index = 5
@@ -17,7 +19,8 @@ def plot_silencer_normal():
     y_output[ts_index + 3] = 5
     y_output[ts_index + 4 :] = 6
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(facecolor="#FAFAFA")
+    ax.set_facecolor("#FAFAFA")
     ax.tick_params(direction="in")
 
     ax.plot(x, y_input, marker="o", linestyle="-", label="Input")
@@ -56,7 +59,8 @@ def plot_silencer_wrap():
     y_output[ts_index + 3] = 11
     y_output[ts_index + 4 :] = 10
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(facecolor="#FAFAFA")
+    ax.set_facecolor("#FAFAFA")
     ax.tick_params(direction="in")
 
     ax.plot(x, y_input, marker="o", linestyle="-", label="Input")
@@ -104,7 +108,8 @@ def plot_silencer_dynamic():
     y_ma[ts_index + 6] = 12
     y_ma[ts_index + 7 :] = 11
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(facecolor="#FAFAFA")
+    ax.set_facecolor("#FAFAFA")
     ax.tick_params(direction="in")
 
     ax.plot(x, y_input, marker="o", linestyle="-", label="Input")
@@ -141,7 +146,8 @@ def plot_silencer_delta():
     y_output[ts_index + 3] = 5
     y_output[ts_index + 4 :] = 6
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(facecolor="#FAFAFA")
+    ax.set_facecolor("#FAFAFA")
     ax.tick_params(direction="in")
 
     ax.plot(x, y_output, marker="o", linestyle="-")

@@ -32,7 +32,7 @@ function init() {
     renderer.setSize(width, height);
 
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xFFFFFF);
+    scene.background = new THREE.Color(0xfafafa);
 
     camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 1000);
     camera.position.set(0, 0, 3);
