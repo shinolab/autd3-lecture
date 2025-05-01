@@ -19,7 +19,7 @@ jobs:
       - run: npm install -g @marp-team/marp-cli 
       - run: |
           mkdir dist
-          marp slide.md --html --output dist/index.html
+          marp slide.md --html --output dist/index.html --title "AUTD3 講習会"
           cp *.svg dist/
           cp *.jpg dist/
           cp *.gif dist/
