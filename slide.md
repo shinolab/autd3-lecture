@@ -2,7 +2,6 @@
 marp: true
 style: |
   section {
-    font-family: 'Segoe UI', sans-serif;
     color: #3F3F3F;
     background:hsl(0, 0.00%, 98.00%);
   }
