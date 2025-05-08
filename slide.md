@@ -450,7 +450,7 @@ style: |
 
 <div class="flex sa">
 
-<object type="image/svg+xml" data="stm-foci.svg" width="200"></object>
+<object type="image/svg+xml" data="stm-gain.svg" width="200"></object>
 
 <div>
 
@@ -768,14 +768,14 @@ style: |
 
 ## 補足①: EtherCAT詳解: TwinCATのパラメータ
 
-- Sync0 Cycle: Sync0の周期デフォは$1\,\mathrm{ms}$. 
-- Send Cycle: データ送信処理の周期. デフォは$1\,\mathrm{ms}^1$. 
-  - データ受信処理がSync0に同期するため, デバイス数が増える場合等は, これらの値を増やす必要がある場合がある
+- Sync0 Cycle: Sync0の周期. デフォは$1\,\mathrm{ms}$. 
+- Task Cycle: データ送受信処理の周期. デフォは$1\,\mathrm{ms}$. 
+  - CPUボードでのデータ受信処理がSync0に同期するため, デバイス数が増える場合等は, これらの値を増やす必要がある場合がある
 
 - CPU base time: TwinCAT 3のリアルタイムタスクの処理間隔. デフォは$1\,\mathrm{ms}^1$. 
-  - Send Cycleはこれの整数倍のみ
+  - Task Cycleはこれの整数倍のみ
 
->>> [Beckhoff曰く](https://infosys.beckhoff.com/english.php?content=../content/1033/tcsystemmanager/1086417035.html&id=), 必要なければ$1\,\mathrm{ms}^1$推奨
+>>> [Beckhoff曰く](https://infosys.beckhoff.com/english.php?content=../content/1033/tcsystemmanager/1086417035.html&id=), 必要なければ$1\,\mathrm{ms}$推奨
 
 ---
 
@@ -1105,7 +1105,7 @@ button:hover {
 
 ---
 
-## `Simualtor`
+## `Simulator`
 
 <div class="topic">autd3ライブラリの主要コンポーネント: Link</div>
 
@@ -1271,3 +1271,26 @@ AM変調用のデータ列を計算する情報を格納
   1. 問題のコード
     - バグを再現する最小限のコードだとなお良い
     - たまに画像で送ってくる人いるんですけど, 文字列として送ってください
+
+---
+
+## FAQ①
+
+- Q: データの更新はEtherCATの送信間隔で決定されてしまう? 例えば, Task Cycleが$1\,\mathrm{ms}$の時, $0.5\,\mathrm{ms}$で更新したい場合はどうすればいい?
+- A: データの更新間隔はEtherCATの送信間隔で決定される. また, AUTD3では, EtherCATフレームの長さは1デバイスあたり$626\,\mathrm{byte}$になる. なので, 具体的には, 例えば, `Gain`を送信する場合, 1デバイスあたり位相/強度でそれぞれ$1\,\mathrm{byte}$, 振動子が249個なので, 1デバイスあたり$2\,\mathrm{byte}\times 249=498\,\mathrm{byte}$のデータが必要で1フレームでは一つ分の`Gain`データしか送れない. つまり, `Gain`データの更新は$1\,\mathrm{ms}$間隔でしか不可能. `GainSTM`も同様で, $n$パターンの`Gain`を送るには$n\,\mathrm{ms}$必要になる. ただし, 一度書き込まれたものを周期的に再生する時は, データ更新間隔は関係ないので`GainSTM`のサンプリング周波数は$40\,\mathrm{kHz}/d, d\in[1,2,...,65535]$とできる. なお, `FociSTM`は1フレームあたり約70焦点分のデータが送れる.
+
+---
+
+## FAQ②
+
+- Q: デバイスの数に対するSync0 CycleやTask Cycleの目安は? 
+- A: EtherCATは100BASE-TXで動作するのでスループットは$100\,\mathrm{Mbps}$. AUTD3のEtherCATフレームの長さは1デバイスあたり$626\,\mathrm{byte}$なので, 1デバイスあたりは$626\,\mathrm{byte}\times 8/100\,\mathrm{Mbps}=0.05008\,\mathrm{ms}$で送信できる. ので, 理論上は19台まではSync0 Cycleは$1\,\mathrm{ms}$で行けるはず. (実際は, EtherCAT用のヘッダーデータや伝搬遅延などがあるのでもっと低い. 大体10台くらいが限界?). Sync0信号はFPGA内部での同期補正処理にも使うので可能な限り短いほうが良い. エラーがでない限界を探ってほしい. Task CycleはCPUの性能に依存するのでなんとも言えないが, 基本的にTask CycleとSync0 Cycleは同じで良いと思う.
+
+---
+
+## FAQ③
+
+- Q: Silencerはどのくらいかけて良いのか? $\Delta$や$\Delta T$の目安は?
+- A: ぶっちゃけわからない. ただし, デフォルトのSilencer (位相に対して$\Delta T=1\,\mathrm{ms}$, 振幅に対して$\Delta T=0.25\,\mathrm{ms}$) くらいであれば基本的にはかけとくだけ得と思って良いと思う. それ以上強くすると, ノイズは小さくなるかもしれないが, 音場に悪い影響が出る可能性がある. 詳しくは論文$^1$を参照してほしい. autd3 emulatorで挙動を確認することもできるが, 出力する音場等に大きく依存するので一般的なことは言い難い.
+
+>>> 1: Suzuki, Shun, et al. “Reducing amplitude fluctuation by gradual phase shift in midair ultrasound haptics.” IEEE transactions on haptics 13.1 (2020): 87-93.
