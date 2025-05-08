@@ -89,7 +89,7 @@ style: |
 
 鈴木 颯
 東京大学 篠田・牧野研究室 特任助教
-2025/04/30
+2025/05/08
 
 ---
 
@@ -98,6 +98,9 @@ style: |
 - 本スライドで扱うのは以下のバージョンです
   - Firmware version 11.0.0
   - Software version 32.1.1
+
+- Softwareの使い方の話はしません
+  - [ドキュメント](https://shinolab.github.io/autd3-doc/jp/index.html)を参照してください
 
 - autd3の情報は https://github.com/shinolab/autd3 に集約されています
 
@@ -490,7 +493,7 @@ style: |
 
 ---
 
-## 余談: Silencerによる位相変化抑制再考
+## 補足①: Silencerによる位相変化抑制再考
 
 <div class="flex fw">
 
@@ -514,6 +517,52 @@ style: |
 </div>
 
 </div>
+
+
+---
+
+## 補足②: 冷却用ファン
+
+
+<div class="flex ss">
+
+![width:600](fan.jpg)
+
+<div>
+
+- ファン横のジャンパスイッチでモードを切り替えられる
+  - 図左: Auto (温度センサで制御)
+  - 図中: 常時OFF
+  - 図右: 常時ON
+
+- Autoモードの場合, 一定温度を超えるとファンが回る
+  - あるいは, ForceFan信号で強制的にOnにできる$^1$
+
+</div>
+
+</div>
+
+>>> 1: 強制Offはできない
+
+---
+
+## 補足③: GPIOピン
+
+<div class="flex ss">
+
+![width:600](gpio_pin.jpg)
+
+<div>
+
+- 4入力4出力のGPIOピンがある
+- 入力は現在, セグメントの切り替えトリガにしか使ってない
+- 出力としては, 指定した振動子の駆動信号等を出力できる$^1$
+
+</div>
+
+</div>
+
+>>> 1: 詳細は[ドキュメント](https://shinolab.github.io/autd3-doc/jp/Users_Manual/API/gpio_out.html)を参照
 
 ---
 
@@ -599,7 +648,8 @@ style: |
 
 - EtherCATの本家であるBeckhoff社が提供しているEtherCAT master
 - Windowsでのみ動作する$^1$
-- Windows NTカーネルを拡張してリアルタイム性を実現しているらしい$^2$
+  - Windows NTカーネルを拡張してリアルタイム性を実現しているらしい$^2$
+- リアルタイム動作を保証するためにIntel製のEthernet Controllerを要求
 
 >>> 1: 最近 (2024年4月) TwinCAT runtime for real-time Linuxが発表された. Q3 2025にリリース予定?
 >>> 2: https://infosys.beckhoff.com/english.php?content=../content/1033/tcsystemover/12695813131.html&id=2075408258360613694
@@ -680,7 +730,56 @@ style: |
 
 ---
 
-## 補足①: STM/Modulationのメモリセグメントについて
+## 補足①: EtherCAT詳解: EtherCAT通信タイミング
+
+<div class="flex ss">
+
+<object type="image/svg+xml" data="ecat-timing.svg" width="500" height="450"></object>
+
+<div>
+
+- Sync0: EtherCATのDCシステム時刻から生成される同期信号
+  - FPGAのシステム時刻補正にも使う
+
+- EtherCATのデータ処理は**同期**
+- AUTD3のデータ処理タイミングは**非同期**
+
+</div>
+
+</div> 
+
+---
+
+## 補足①: EtherCAT詳解: EtherCAT state
+
+- EtherCAT slaveの状態
+  - Init: 初期状態
+  - Pre-Op: 準備状態
+  - Safe-Op: 安全運転状態
+  - Op: 運転状態
+
+- Op状態でないと, EtherCAT Slaveはデータを受信処理しない
+
+- 障害が起こる (データが所定の時間内に受信されない等) と, Safe-Op状態に遷移
+
+>>> ECSファームウェア書き換えに使うBootstrap状態もある
+
+---
+
+## 補足①: EtherCAT詳解: TwinCATのパラメータ
+
+- Sync0 Cycle: Sync0の周期デフォは$1\,\mathrm{ms}$. 
+- Send Cycle: データ送信処理の周期. デフォは$1\,\mathrm{ms}^1$. 
+  - データ受信処理がSync0に同期するため, デバイス数が増える場合等は, これらの値を増やす必要がある場合がある
+
+- CPU base time: TwinCAT 3のリアルタイムタスクの処理間隔. デフォは$1\,\mathrm{ms}^1$. 
+  - Send Cycleはこれの整数倍のみ
+
+>>> [Beckhoff曰く](https://infosys.beckhoff.com/english.php?content=../content/1033/tcsystemmanager/1086417035.html&id=), 必要なければ$1\,\mathrm{ms}^1$推奨
+
+---
+
+## 補足②: STM/Modulationのメモリセグメントについて
 
 - STM/Modulationは同期のために, 周期的な動作を基本としている
   - STM/Modulationのサンプリングインデックス$i$は$i = \left\lfloor\frac{t_\text{system}}{512 \times d}\right\rfloor\ \mathrm{mod}\ c$で決定される
@@ -694,7 +793,7 @@ style: |
 
 ## セグメントの切り替え: SyncIdx
 
-<div class="topic">補足①: STM/Modulationのメモリセグメントについて</div>
+<div class="topic">補足②: STM/Modulationのメモリセグメントについて</div>
 
 <style scoped>
 .container-body {
@@ -873,7 +972,7 @@ button:hover {
 
 ## セグメントの切り替え: SysTime + α
 
-<div class="topic">補足①: STM/Modulationのメモリセグメントについて</div>
+<div class="topic">補足②: STM/Modulationのメモリセグメントについて</div>
 
 - SysTime
   - 所定のEtherCATシステム時間に遷移するモード$^1$
@@ -886,51 +985,6 @@ button:hover {
   - 2つのセグメント間を自動で切り替えるモード
 
 >>> 1: システム時間がわかれば, オフセットも計算できる
-
----
-
-## 補足②: 冷却用ファン
-
-
-<div class="flex ss">
-
-![width:600](fan.jpg)
-
-<div>
-
-- ファン横のジャンパスイッチでモードを切り替えられる
-  - 図左: Auto (温度センサで制御)
-  - 図中: 常時OFF
-  - 図右: 常時ON
-
-- Autoモードの場合, 一定温度を超えるとファンが回る
-  - あるいは, ForceFan信号で強制的にOnにできる$^1$
-
-</div>
-
-</div>
-
->>> 1: 強制Offはできない
-
----
-
-## 補足③: GPIOピン
-
-<div class="flex ss">
-
-![width:600](gpio_pin.jpg)
-
-<div>
-
-- 4入力4出力のGPIOピンがある
-- 入力は現在, セグメントの切り替えトリガにしか使ってない
-- 出力としては, 指定した振動子の駆動信号等を出力できる$^1$
-
-</div>
-
-</div>
-
->>> 1: 詳細は[ドキュメント](https://shinolab.github.io/autd3-doc/jp/Users_Manual/API/gpio_out.html)を参照
 
 ---
 
@@ -1169,6 +1223,40 @@ AM変調用のデータ列を計算する情報を格納
 </div>
 
 </div>
+
+---
+
+## 補足①: AUTD3 Simulator
+
+<div class="flex ss">
+
+![width:400](simulator.png)
+
+<div>
+
+- autd3を使用したプログラムの動作確認用シミュレータ
+
+- 音場の可視化を行うことができる
+  - ただし, 音場は球面波の線形重ね合わせ
+  - 非線形性や振動子の特性, 伝搬遅延, Silencer処理等は考慮されない
+
+</div>
+
+</div>
+
+---
+
+## 補足②: AUTD3 emulator
+
+- Rust, 及び, Pythonから使用できるエミュレータ
+
+- Simulatorより正確な音場の計算ができる
+  - 振動子の特性, 伝搬遅延, Silencer処理等を考慮
+  - 非線形性は考慮されない
+
+- 音場の可視化はできない
+
+- Firmware内部のデータ出力もエミュレート可能
 
 ---
 
